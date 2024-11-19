@@ -1,4 +1,4 @@
-                                   Simple Banking Software Overview
+         Simple Banking Software Overview
 								   
 This simple banking software project allows both Admin and User to perform various operations.
 
