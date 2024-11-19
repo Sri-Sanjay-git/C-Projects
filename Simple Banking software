@@ -1,0 +1,333 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <unistd.h>  
+#include <stdbool.h> 
+
+#define MAX_CUSTOMERS 10000
+
+struct Customer {
+    char firstName[50];
+    char lastName[50];
+    char fatherName[50];
+    char motherName[50];
+    char email[100];
+    char phone[15];
+    char aadhar[20];
+    char pan[15];
+    char nominee[50];
+    int accountNumber;
+    long long cardNumber;
+    int expiryMonth;
+    int expiryYear;
+    int cvv;
+};
+
+struct Customer customers[MAX_CUSTOMERS];
+int customerCount = 0;
+void adminLogin();
+void userLogin();
+void askUser();
+void addNewCustomer();
+void viewCustomerDetails();
+int generateAccountNumber();
+long long generateCardNumber();
+void generateExpiryDate(int *month, int *year);
+int generateCVV();
+void userPanel(int *acc_num);
+void deposit(int *currentBalance, int *totalDep);
+void withdraw(int *currentBalance, int *totalWith);
+void checkBalance(int currentBalance);
+void accountDetails(int acc_num, int currentBalance, bool cardStatus);
+void cardControl(bool *cardStatus);
+
+// Main
+int main() {
+    srand(time(0)); 
+    askUser();
+    return 0;
+}
+void askUser() {
+    int choice;
+    printf("\n-----------------------------------\n");
+    printf("*          Welcome to Bank        *\n");
+    printf("-----------------------------------\n");
+    printf("* 1: User Login                   *\n");
+    printf("* 2: Admin Login                  *\n");
+    printf("-----------------------------------\n");
+    printf("Enter your choice: ");
+    scanf("%d", &choice);
+
+    if (choice == 1) {
+        userLogin();
+    } else if (choice == 2) {
+        adminLogin();
+    } else {
+        printf("Invalid choice. Exiting...\n");
+        exit(0);
+    }
+}
+// ----------------------------------------------------------
+
+
+// --------------------------- Admin ------------------------
+void adminLogin() {
+    int id;
+    char pass[20];
+
+    printf("\n-----------------------------------\n");
+    printf("         Bank Admin Login          \n");
+    printf("-----------------------------------\n");
+    printf("Login ID: ");
+    scanf("%d", &id);
+    printf("Password: ");
+    scanf("%s", pass);
+
+    if (id == 1234 && strcmp(pass, "admin123") == 0) {
+        printf("Login Successful!\n");
+
+        int choice;
+        do {
+            printf("\n*****************************************\n");
+            printf("*               Admin Panel             *\n");
+            printf("*---------------------------------------*\n");
+            printf("* 1: Add New Customer                   *\n");
+            printf("* 2: View Customer Details              *\n");
+            printf("* 3: Exit                               *\n");
+            printf("*****************************************\n");
+
+            printf("Select an option: ");
+            scanf("%d", &choice);
+
+            switch (choice) {
+                case 1:
+                    addNewCustomer();
+                    break;
+                case 2:
+                    viewCustomerDetails();
+                    break;
+                case 3:
+                    printf("Exiting Admin Panel... Thank you!\n");
+                    break;
+                default:
+                    printf("Invalid choice. Please try again.\n");
+            }
+        } while (choice != 3);
+    } else {
+        printf("Invalid credentials. Exiting...\n");
+        exit(0);
+    }
+}
+void addNewCustomer() {
+    if (customerCount >= MAX_CUSTOMERS) {
+        printf("Customer database is full!\n");
+        return;
+    }
+
+    struct Customer newCustomer;
+
+    printf("\n-----------------------------------\n");
+    printf("           New Customer            \n");
+    printf("-----------------------------------\n");
+
+    printf("First Name: ");
+    scanf("%s", newCustomer.firstName);
+
+    printf("Last Name: ");
+    scanf("%s", newCustomer.lastName);
+
+    printf("Father's Name: ");
+    scanf("%s", newCustomer.fatherName);
+
+    printf("Mother's Name: ");
+    scanf("%s", newCustomer.motherName);
+
+    printf("Email ID: ");
+    scanf("%s", newCustomer.email);
+
+    printf("Phone Number: ");
+    scanf("%s", newCustomer.phone);
+
+    printf("Aadhar Number: ");
+    scanf("%s", newCustomer.aadhar);
+
+    printf("PAN: ");
+    scanf("%s", newCustomer.pan);
+
+    printf("Nominee Name: ");
+    scanf("%s", newCustomer.nominee);
+
+   
+    newCustomer.accountNumber = generateAccountNumber();
+    newCustomer.cardNumber = generateCardNumber();
+    generateExpiryDate(&newCustomer.expiryMonth, &newCustomer.expiryYear);
+    newCustomer.cvv = generateCVV();
+
+   
+    char confirm[2];
+    printf("Confirm adding this customer (Y/N): ");
+    scanf("%s", confirm);
+
+    if (strcmp(confirm, "Y") == 0 || strcmp(confirm, "y") == 0) {
+        customers[customerCount++] = newCustomer;
+        printf("Customer added successfully! Account Number: %d\n", newCustomer.accountNumber);
+    } else {
+        printf("Customer addition cancelled.\n");
+    }
+}
+void viewCustomerDetails() {
+    if (customerCount == 0) {
+        printf("No customers available!\n");
+        return;
+    }
+
+    printf("\n-----------------------------------\n");
+    printf("          Customer Details          \n");
+    printf("-----------------------------------\n");
+
+    for (int i = 0; i < customerCount; i++) {
+        printf("\nCustomer #%d:\n", i + 1);
+        printf("Name        : %s %s\n", customers[i].firstName, customers[i].lastName);
+        printf("Father Name : %s\n", customers[i].fatherName);
+        printf("Mother Name : %s\n", customers[i].motherName);
+        printf("Email ID    : %s\n", customers[i].email);
+        printf("Phone       : %s\n", customers[i].phone);
+        printf("Aadhar No.  : %s\n", customers[i].aadhar);
+        printf("PAN         : %s\n", customers[i].pan);
+        printf("Nominee     : %s\n", customers[i].nominee);
+        printf("Account No. : %d\n", customers[i].accountNumber);
+        printf("Card No.    : %lld\n", customers[i].cardNumber);
+        printf("Expiry Date : %02d/%d\n", customers[i].expiryMonth, customers[i].expiryYear);
+        printf("CVV         : %d\n", customers[i].cvv);
+    }
+}
+int generateAccountNumber() {
+    return 100000 + rand() % 900000;
+}
+long long generateCardNumber() {
+    return 4000000000000000LL + rand() % 1000000000000000;
+}
+void generateExpiryDate(int *month, int *year) {
+    *month = 1 + rand() % 12;
+    *year = 2024 + rand() % 7;
+}
+int generateCVV() {
+    return 100 + rand() % 900;
+}
+// ---------------------------------------------------------
+
+
+
+// --------------------------- User ------------------------
+void userLogin() {
+    int acc_num;
+    char pass[20];
+    printf("Enter Your Account Number: ");
+    scanf("%d", &acc_num);
+
+    printf("Enter Your Password: ");
+    scanf("%s", pass);
+
+    printf("Login Successful!\n");
+    userPanel(&acc_num);
+}
+void userPanel(int *acc_num) {
+    int currentBalance = 0;
+    int totalDep = 0;
+    int totalWith = 0;
+    bool cardStatus = false;
+
+    int choice;
+    do {
+        printf("\n*****************************************\n");
+        printf("*               Online Banking          *\n");
+        printf("*---------------------------------------*\n");
+        printf("* 1: Deposit Money                      *\n");
+        printf("* 2: Withdraw Money                     *\n");
+        printf("* 3: Check Balance                      *\n");
+        printf("* 4: Account Details                    *\n");
+        printf("* 5: Card Control                       *\n");
+        printf("* 6: Exit                               *\n");
+        printf("*****************************************\n");
+
+        printf("Select a service: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                deposit(&currentBalance, &totalDep);
+                break;
+            case 2:
+                withdraw(&currentBalance, &totalWith);
+                break;
+            case 3:
+                checkBalance(currentBalance);
+                break;
+            case 4:
+                accountDetails(*acc_num, currentBalance, cardStatus);
+                break;
+            case 5:
+                cardControl(&cardStatus);
+                break;
+            case 6:
+                printf("Exiting... Thank you for using Online Banking.\n");
+                break;
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+    } while (choice != 6);
+}
+void deposit(int *currentBalance, int *totalDep) {
+    int amount;
+    printf("Enter the amount to deposit: ");
+    scanf("%d", &amount);
+
+    if (amount > 0) {
+        *currentBalance += amount;
+        *totalDep += amount;
+        printf("Successfully deposited Rs. %d. Current balance: Rs. %d\n", amount, *currentBalance);
+    } else {
+        printf("Invalid amount entered.\n");
+    }
+}
+void withdraw(int *currentBalance, int *totalWith) {
+    int amount;
+    printf("Enter the amount to withdraw: ");
+    scanf("%d", &amount);
+
+    if (amount > 0 && amount <= *currentBalance) {
+        *currentBalance -= amount;
+        *totalWith += amount;
+        printf("Successfully withdrew Rs. %d. Current balance: Rs. %d\n", amount, *currentBalance);
+    } else {
+        printf("Insufficient balance or invalid amount.\n");
+    }
+}
+void checkBalance(int currentBalance) {
+    printf("Your current balance is Rs. %d\n", currentBalance);
+}
+void accountDetails(int acc_num, int currentBalance, bool cardStatus) {
+    printf("\nAccount Number: %d\n", acc_num);
+    printf("Current Balance: Rs. %d\n", currentBalance);
+    printf("Card Status: %s\n", cardStatus ? "Active" : "Inactive");
+}
+void cardControl(bool *cardStatus) {
+    int choice;
+    printf("\nCard Control Menu:\n");
+    printf("1: Activate Card\n");
+    printf("2: Deactivate Card\n");
+    printf("Select an option: ");
+    scanf("%d", &choice);
+
+    if (choice == 1) {
+        *cardStatus = true;
+        printf("Card Activated Successfully.\n");
+    } else if (choice == 2) {
+        *cardStatus = false;
+        printf("Card Deactivated Successfully.\n");
+    } else {
+        printf("Invalid choice.\n");
+    }
+}
+// ---------------------------------------------------------
